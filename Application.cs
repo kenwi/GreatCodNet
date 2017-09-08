@@ -3,15 +3,19 @@
 namespace GreatCodNet
 {
     using SFML.Graphics;
+    using SFML.System;
+    using SFML.Window;
 
     public class Application
     {
         private RenderWindow RenderWindow;
+        private QuadTree QuadTree = new QuadTree(new Vector2f(1024/2,768/2));
 
         public Application()
         {
-            RenderWindow = new RenderWindow(new SFML.Window.VideoMode(1024, 768), "Application");
+            RenderWindow = new RenderWindow(new VideoMode(1024, 768), "Application");
             RenderWindow.MouseButtonPressed += RenderWindow_MouseButtonPressed;
+            RenderWindow.MouseWheelScrolled += RenderWindow_MouseWheelScrolled;
             RenderWindow.KeyPressed += RenderWindow_KeyPressed;
             RenderWindow.Closed += (sender, e) => RenderWindow.Close();
         }
@@ -29,17 +33,28 @@ namespace GreatCodNet
         {
             RenderWindow.Clear();
 
+            RenderWindow.Draw(QuadTree.Bounds);
+
             RenderWindow.Display();
         }
 
-        private void RenderWindow_KeyPressed(object sender, SFML.Window.KeyEventArgs e)
+        private void RenderWindow_KeyPressed(object sender, KeyEventArgs e)
         {
-            System.Console.WriteLine("Keypress");
+            Console.WriteLine($"Keypress {e.Code}");
+            if(e.Code == Keyboard.Key.Escape)
+            {
+                RenderWindow.Close();
+            }
         }
 
-        private void RenderWindow_MouseButtonPressed(object sender, SFML.Window.MouseButtonEventArgs e)
+        private void RenderWindow_MouseButtonPressed(object sender, MouseButtonEventArgs e)
         {
-            System.Console.WriteLine("Mouseclick");
+            Console.WriteLine($"Mouseclick {e.Button} x:{e.X}, y:{e.Y}");
+        }
+
+        private void RenderWindow_MouseWheelScrolled(object sender, MouseWheelScrollEventArgs e)
+        {
+            Console.WriteLine($"Mouse {e.Wheel} {e.Delta} x:{e.X}, y:{e.Y}");
         }
     }
 }
