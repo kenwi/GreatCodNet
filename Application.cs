@@ -9,7 +9,7 @@ namespace GreatCodNet
     public class Application
     {
         private RenderWindow RenderWindow;
-        private QuadTree QuadTree = new QuadTree(new Vector2f(1024/2,768/2));
+        private QuadTree QuadTree = new QuadTree(0, new RectangleShape(new Vector2f(1024, 768)),  new Vector2f(0, 0));
 
         public Application()
         {
