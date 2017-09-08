@@ -9,7 +9,7 @@ namespace GreatCodNet
     public class Application
     {
         private RenderWindow RenderWindow;
-        private QuadTree QuadTree = new QuadTree(0, new RectangleShape(new Vector2f(1024, 768)),  new Vector2f(0, 0));
+        private QuadTree QuadTree = new QuadTree(0, new RectangleShape(new Vector2f(100, 100)),  new Vector2f(0, 0));
 
         public Application()
         {
@@ -33,7 +33,7 @@ namespace GreatCodNet
         {
             RenderWindow.Clear();
 
-            RenderWindow.Draw(QuadTree.Bounds);
+            QuadTree.Draw(RenderWindow);
 
             RenderWindow.Display();
         }
@@ -44,6 +44,11 @@ namespace GreatCodNet
             if(e.Code == Keyboard.Key.Escape)
             {
                 RenderWindow.Close();
+            }
+            if(e.Code == Keyboard.Key.I)
+            {
+                //Console.WriteLine($"{QuadTree.}");
+                Console.WriteLine($"Quadtree Position x:{QuadTree.Position.X}, y:{QuadTree.Position.Y}");
             }
         }
 

@@ -2,38 +2,69 @@
 
 namespace GreatCodNet
 {
+    using System;
     using SFML.Graphics;
     using SFML.System;
 
     public class QuadTree
     {
-        public RectangleShape Bounds;
+        public Vector2f Position => Bounds.Position;
 
-        public QuadTree(int Level, RectangleShape Bounds, Vector2f Position)
-        {
-            this.Bounds = new RectangleShape(new Vector2f(10, 10));
-            this.Bounds.OutlineThickness = OutlineThickness;
-            this.Bounds.OutlineColor = OutlineColor;
-            this.Bounds.FillColor = FillColor;
+        Color OutlineColor = Color.White;
+        Color FillColor = Color.Black;
+        RectangleShape Bounds;
 
-            this.Position = new Vector2f(0, 0);
-            this.Level = Level;
-            this.Bounds = Bounds;
-        }
-        
-        private Color OutlineColor = Color.White;
-        private Color FillColor = Color.Black;
-        private Vector2f Position;
-
-        private float OutlineThickness = 1;
-        private bool DrawBounds = true;
-        private int MaxObjects = 4;
-        private int MaxLevels = 10;
-        private int Level = 0;
+        float OutlineThickness = 1;
+        bool DrawBounds = true;
+        int MaxObjects = 4;
+        int MaxLevels = 10;
+        int Level = 0;
 
         List<QuadTree> nodes = new List<QuadTree>(4);
         List<CircleShape> objects = new List<CircleShape>(4);
 
-        
+        public QuadTree(int level, RectangleShape bounds, Vector2f position)
+        {
+            Bounds = bounds;
+            Bounds.OutlineThickness = OutlineThickness;
+            Bounds.OutlineColor = OutlineColor;
+            Bounds.FillColor = FillColor;
+            Bounds.Position = position;
+            Level = level;
+        }
+
+        public void Draw(RenderWindow renderWindow)
+        {
+            if(DrawBounds)
+                renderWindow.Draw(Bounds);
+        }
+
+        public void Insert(CircleShape shape)
+        {
+            if(objects.Count == 0)
+            {
+                int index = GetIndex(shape);
+            }
+
+            objects.Add(shape);
+            if(objects.Count > MaxObjects)
+            {
+                if(nodes.Count == 0 )
+                {
+                    Split();
+                }
+            }
+            
+        }
+
+        private void Split()
+        {
+            Console.WriteLine($"Splitting QuadTree at level {this.Level}");
+        }
+
+        private int GetIndex(CircleShape shape)
+        {
+            return -1;
+        }
     }
 }
