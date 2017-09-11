@@ -24,13 +24,13 @@ namespace GreatCodNet
         private List<Edge> edges;
         private List<QuadTree> nodes = new List<QuadTree>();
 
-        public QuadTree(int level, RectangleShape bounds, Vector2f position)
+        public QuadTree(int level, RectangleShape bounds, Vector2f position, bool center = false)
         {
             Bounds = bounds;
             Bounds.OutlineThickness = OutlineThickness;
             Bounds.OutlineColor = OutlineColor;
             Bounds.FillColor = FillColor;
-            Bounds.Position = position;
+            Bounds.Position = center ? position - GetCenter() : position;
             Level = level;
             SetupEdges(bounds);
         }

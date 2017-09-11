@@ -8,28 +8,27 @@ namespace GreatCodNet
 
     public class Application
     {
-        private static Vector2f _windowSize = new Vector2f(1024, 768);
+        private static Vector2f _windowSize;
         private readonly RenderWindow _renderWindow;
-        private readonly QuadTree _quadTree = new QuadTree(0, new RectangleShape(new Vector2f(100, 100)), new Vector2f(0, 0));
+        private readonly QuadTree _quadTree;
 
         int numPoints = 0;
         Vertex[] points = new Vertex[100];
 
         public Application()
         {
+            _windowSize = new Vector2f(1024, 768);
+
             _renderWindow = new RenderWindow(new VideoMode((uint)_windowSize.X, (uint)_windowSize.Y), "Application");
             _renderWindow.MouseButtonPressed += RenderWindow_MouseButtonPressed;
             _renderWindow.MouseWheelScrolled += RenderWindow_MouseWheelScrolled;
             _renderWindow.KeyPressed += RenderWindow_KeyPressed;
             _renderWindow.Closed += (sender, e) => _renderWindow.Close();
 
-            // Center the quadtree
-            Vector2f quadCenter = _quadTree.GetCenter();
-            AddPoint(quadCenter);
+            var screenCenter = new Vector2f(_renderWindow.Size.X / 2, _renderWindow.Size.Y / 2);
+            AddPoint(screenCenter);
 
-            Vector2f screenCenter = new Vector2f(_renderWindow.Position.X + _renderWindow.Size.X / 2,
-                _renderWindow.Position.Y + _renderWindow.Size.Y / 2);
-            _quadTree.SetPosition(screenCenter - quadCenter);
+            _quadTree = new QuadTree(0, new RectangleShape(new Vector2f(1000, 700)), screenCenter, center:true);
         }
 
         private void AddPoint(Vector2f point)
