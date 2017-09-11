@@ -7,20 +7,10 @@ namespace GreatCodNet
     using SFML.Graphics;
     using SFML.System;
 
-    public class Edge
-    {
-        public float x1;
-        public float x2;
-        public float y1;
-        public float y2;
-
-        public string name;
-    }
-    
     public class QuadTree
     {
         public Vector2f Position => Bounds.Position;
-        public Color FillColor;// = Color.Blue;
+        public Color FillColor = Color.Blue;
         
         Color OutlineColor = Color.White;
         RectangleShape Bounds;
@@ -42,7 +32,7 @@ namespace GreatCodNet
             Bounds.FillColor = FillColor;
             Bounds.Position = position;
             Level = level;
-            SetupEdges();
+            SetupEdges(bounds);
         }
 
         public void Draw(RenderWindow renderWindow)
@@ -52,21 +42,21 @@ namespace GreatCodNet
             
             foreach (var node in nodes)
             {
-                renderWindow.Draw(node.Bounds);
+                node.Draw(renderWindow);
             }
         }
 
-        public void SetupEdges()
+        public void SetupEdges(RectangleShape bounds)
         {
             edges = new List<Edge>
             {
                 new Edge()
                 {
                     name = "TopEdge",
-                    x1 = Bounds.Position.X,
-                    x2 = Bounds.Position.X + Bounds.Size.X,
-                    y1 = Bounds.Position.Y,
-                    y2 = Bounds.Position.Y
+                    x1 = bounds.Position.X,
+                    x2 = bounds.Position.X + bounds.Size.X,
+                    y1 = bounds.Position.Y,
+                    y2 = bounds.Position.Y
                 }, 
                 new Edge()
                 {
@@ -100,7 +90,6 @@ namespace GreatCodNet
             var xp = point.X;
             var yp = point.Y;
 
-
             foreach (var edge in edges)
             {
                 Console.WriteLine($"Checking {edge.name}");
@@ -118,7 +107,6 @@ namespace GreatCodNet
                 var D = A * xp + B * yp + C;
                 if (D < 0)
                     return false;
-
             }
             
             return true;
@@ -128,30 +116,34 @@ namespace GreatCodNet
         {
             Console.WriteLine($"Splitting QuadTree at level {this.Level}");
             
-            var newBounds = new RectangleShape(new Vector2f(Bounds.Size.X/2, (float)Bounds.Size.Y/2));
+            var newBounds = new RectangleShape(new Vector2f(Bounds.Size.X/2, Bounds.Size.Y/2));
             var center = GetCenter();
 
-            var northEast = new QuadTree(Level+1, newBounds, new Vector2f(center.X, center.Y - newBounds.Size.Y));
-            nodes.Add(northEast);
-            
-            var northWest = new QuadTree(Level+1, newBounds, new Vector2f(center.X - newBounds.Size.X, center.Y - newBounds.Size.Y));
-            nodes.Add(northWest);
-            
-            var southWest = new QuadTree(Level+1, newBounds, new Vector2f(center.X - newBounds.Size.X, center.Y));
-            nodes.Add(southWest);
-            
-            var southEast = new QuadTree(Level+1, newBounds, new Vector2f(center.X, center.Y));
-            nodes.Add(southEast);
+            var northEast = new QuadTree(Level+1, new RectangleShape(newBounds), new Vector2f(center.X, center.Y - newBounds.Size.Y));
+            var northWest = new QuadTree(Level+1, new RectangleShape(newBounds), new Vector2f(center.X - newBounds.Size.X, center.Y - newBounds.Size.Y));
+            var southWest = new QuadTree(Level+1, new RectangleShape(newBounds), new Vector2f(center.X - newBounds.Size.X, center.Y));
+            var southEast = new QuadTree(Level+1, new RectangleShape(newBounds), new Vector2f(center.X, center.Y));
+            nodes.AddRange(new List<QuadTree>{northEast, northWest, southWest, southEast});
         }
 
-        private int GetIndex(CircleShape shape)
+        public int GetIndex(Vector2f position)
         {
-            return -1;
+            int index = -1;
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                if (nodes[i] != null && nodes[i].IsInside(position))
+                {
+                    index = i;
+                }
+            }
+            
+            return index;
         }
 
         public void SetPosition(Vector2f position)
         {
-            this.Bounds.Position = position;
+            Bounds.Position = position;
+            SetupEdges(Bounds);
         }
 
         public Vector2f GetCenter()

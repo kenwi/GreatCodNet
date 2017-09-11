@@ -65,9 +65,17 @@ namespace GreatCodNet
         private void RenderWindow_MouseButtonPressed(object sender, MouseButtonEventArgs e)
         {
             Console.WriteLine($"Mouseclick {e.Button} x:{e.X}, y:{e.Y}");
-            var contains = _quadTree.IsInside(new Vector2f(e.X, e.Y));
-            Console.WriteLine(contains ? "Inside" : "Outside");
-
+            if (e.Button == Mouse.Button.Right)
+            {
+                var index = _quadTree.GetIndex(new Vector2f(e.X, e.Y));
+                Console.WriteLine($"Index: {index}");
+            }
+            if (e.Button == Mouse.Button.Left)
+            {
+                var contains = _quadTree.IsInside(new Vector2f(e.X, e.Y));
+                Console.WriteLine(contains ? "Inside" : "Outside");                
+            }
+            
         }
 
         private void RenderWindow_MouseWheelScrolled(object sender, MouseWheelScrollEventArgs e)
