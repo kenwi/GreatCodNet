@@ -6,12 +6,22 @@ namespace GreatCodNet
     using SFML.Graphics;
     using SFML.System;
 
+    public class Edge
+    {
+        public float x1;
+        public float x2;
+        public float y1;
+        public float y2;
+
+        public string name;
+    }
+    
     public class QuadTree
     {
         public Vector2f Position => Bounds.Position;
 
         Color OutlineColor = Color.White;
-        Color FillColor = Color.Black;
+        Color FillColor = Color.Blue;
         RectangleShape Bounds;
 
         float OutlineThickness = 1;
@@ -19,9 +29,6 @@ namespace GreatCodNet
         int MaxObjects = 4;
         int MaxLevels = 10;
         int Level = 0;
-
-        List<QuadTree> nodes = new List<QuadTree>(4);
-        List<CircleShape> objects = new List<CircleShape>(4);
 
         public QuadTree(int level, RectangleShape bounds, Vector2f position)
         {
@@ -31,6 +38,7 @@ namespace GreatCodNet
             Bounds.FillColor = FillColor;
             Bounds.Position = position;
             Level = level;
+            
         }
 
         public void Draw(RenderWindow renderWindow)
@@ -41,20 +49,70 @@ namespace GreatCodNet
 
         public void Insert(CircleShape shape)
         {
-            if(objects.Count == 0)
-            {
-                int index = GetIndex(shape);
-            }
+            
+        }
 
-            objects.Add(shape);
-            if(objects.Count > MaxObjects)
+        public bool Contains(Vector2f point, RenderWindow renderWindow)
+        {
+            var xp = point.X;
+            var yp = point.Y;
+            var edges = new List<Edge>
             {
-                if(nodes.Count == 0 )
+                new Edge()
                 {
-                    Split();
+                    name = "TopEdge",
+                    x1 = Bounds.Position.X,
+                    x2 = Bounds.Position.X + Bounds.Size.X,
+                    y1 = Bounds.Position.Y,
+                    y2 = Bounds.Position.Y
+                }, 
+                new Edge()
+                {
+                    name = "LeftEdge",
+                    x1 = Bounds.Position.X,
+                    x2 = Bounds.Position.X,
+                    y1 = Bounds.Position.Y + Bounds.Size.Y,
+                    y2 = Bounds.Position.Y
+                },
+                new Edge()
+                {
+                    name = "BottomEdge",
+                    x1 = Bounds.Position.X + Bounds.Size.X,
+                    x2 = Bounds.Position.X,
+                    y1 = Bounds.Position.Y + Bounds.Size.Y,
+                    y2 = Bounds.Position.Y + Bounds.Size.Y
+                }, 
+                new Edge()
+                {
+                    name = "RightEdge",
+                    x1 = Bounds.Position.X + Bounds.Size.X,
+                    x2 = Bounds.Position.X + Bounds.Size.X,
+                    y1 = Bounds.Position.Y,
+                    y2 = Bounds.Position.Y + Bounds.Size.Y
                 }
+            };
+
+            foreach (var edge in edges)
+            {
+                Console.WriteLine($"Checking {edge.name}");
+                
+                // A * x + B * y + C = 0
+                var x1 = edge.x1;
+                var x2 = edge.x2;
+                var y1 = edge.y1;
+                var y2 = edge.y2;
+
+                var A = -(y2 - y1);
+                var B = x2 - x1;
+                var C = -(A * x1 + B * y1);
+                
+                var D = A * xp + B * yp + C;
+                if (D < 0)
+                    return false;
+
             }
             
+            return true;
         }
 
         private void Split()
@@ -65,6 +123,16 @@ namespace GreatCodNet
         private int GetIndex(CircleShape shape)
         {
             return -1;
+        }
+
+        public void SetPosition(Vector2f position)
+        {
+            this.Bounds.Position = position;
+        }
+
+        public Vector2f GetCenter()
+        {
+            return new Vector2f(this.Bounds.Position.X + this.Bounds.Size.X / 2, this.Bounds.Position.Y + this.Bounds.Size.Y / 2);
         }
     }
 }

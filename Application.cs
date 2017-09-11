@@ -8,34 +8,41 @@ namespace GreatCodNet
 
     public class Application
     {
-        private RenderWindow RenderWindow;
-        private QuadTree QuadTree = new QuadTree(0, new RectangleShape(new Vector2f(100, 100)),  new Vector2f(0, 0));
+        private static Vector2f _windowSize = new Vector2f(1024, 768);
+        private readonly RenderWindow _renderWindow;
+        private readonly QuadTree _quadTree = new QuadTree(0, new RectangleShape(new Vector2f(1000, 700)), new Vector2f(0, 0));
 
         public Application()
         {
-            RenderWindow = new RenderWindow(new VideoMode(1024, 768), "Application");
-            RenderWindow.MouseButtonPressed += RenderWindow_MouseButtonPressed;
-            RenderWindow.MouseWheelScrolled += RenderWindow_MouseWheelScrolled;
-            RenderWindow.KeyPressed += RenderWindow_KeyPressed;
-            RenderWindow.Closed += (sender, e) => RenderWindow.Close();
+            _renderWindow = new RenderWindow(new VideoMode((uint)_windowSize.X, (uint)_windowSize.Y), "Application");
+            _renderWindow.MouseButtonPressed += RenderWindow_MouseButtonPressed;
+            _renderWindow.MouseWheelScrolled += RenderWindow_MouseWheelScrolled;
+            _renderWindow.KeyPressed += RenderWindow_KeyPressed;
+            _renderWindow.Closed += (sender, e) => _renderWindow.Close();
+
+            // Center the quadtree
+            Vector2f quadCenter = _quadTree.GetCenter();
+            Vector2f screenCenter = new Vector2f(_renderWindow.Position.X + _renderWindow.Size.X / 2,
+                _renderWindow.Position.Y + _renderWindow.Size.Y / 2);
+            _quadTree.SetPosition(screenCenter - quadCenter);
         }
 
         public void Run()
         {
-            while (RenderWindow.IsOpen)
+            while (_renderWindow.IsOpen)
             {
                 Render();
-                RenderWindow.WaitAndDispatchEvents();
+                _renderWindow.WaitAndDispatchEvents();
             }            
         }
 
         private void Render()
         {
-            RenderWindow.Clear();
+            _renderWindow.Clear();
 
-            QuadTree.Draw(RenderWindow);
+            _quadTree.Draw(_renderWindow);
 
-            RenderWindow.Display();
+            _renderWindow.Display();
         }
 
         private void RenderWindow_KeyPressed(object sender, KeyEventArgs e)
@@ -43,18 +50,20 @@ namespace GreatCodNet
             Console.WriteLine($"Keypress {e.Code}");
             if(e.Code == Keyboard.Key.Escape)
             {
-                RenderWindow.Close();
+                _renderWindow.Close();
             }
             if(e.Code == Keyboard.Key.I)
             {
-                //Console.WriteLine($"{QuadTree.}");
-                Console.WriteLine($"Quadtree Position x:{QuadTree.Position.X}, y:{QuadTree.Position.Y}");
+                Console.WriteLine($"Quadtree Position x:{_quadTree.Position.X}, y:{_quadTree.Position.Y}");
             }
         }
 
         private void RenderWindow_MouseButtonPressed(object sender, MouseButtonEventArgs e)
         {
             Console.WriteLine($"Mouseclick {e.Button} x:{e.X}, y:{e.Y}");
+            var contains = _quadTree.Contains(new Vector2f(e.X, e.Y), _renderWindow);
+            Console.WriteLine(contains ? "Inside" : "Outside");
+
         }
 
         private void RenderWindow_MouseWheelScrolled(object sender, MouseWheelScrollEventArgs e)
