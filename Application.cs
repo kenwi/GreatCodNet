@@ -10,7 +10,10 @@ namespace GreatCodNet
     {
         private static Vector2f _windowSize = new Vector2f(1024, 768);
         private readonly RenderWindow _renderWindow;
-        private readonly QuadTree _quadTree = new QuadTree(0, new RectangleShape(new Vector2f(1000, 700)), new Vector2f(0, 0));
+        private readonly QuadTree _quadTree = new QuadTree(0, new RectangleShape(new Vector2f(100, 100)), new Vector2f(0, 0));
+
+        int numPoints = 0;
+        Vertex[] points = new Vertex[100];
 
         public Application()
         {
@@ -22,9 +25,21 @@ namespace GreatCodNet
 
             // Center the quadtree
             Vector2f quadCenter = _quadTree.GetCenter();
+            AddPoint(quadCenter);
+
             Vector2f screenCenter = new Vector2f(_renderWindow.Position.X + _renderWindow.Size.X / 2,
                 _renderWindow.Position.Y + _renderWindow.Size.Y / 2);
             _quadTree.SetPosition(screenCenter - quadCenter);
+        }
+
+        private void AddPoint(Vector2f point)
+        {
+            points[numPoints] = new Vertex(point);
+        }
+
+        private void DrawPoints()
+        {
+            _renderWindow.Draw(points, PrimitiveType.Points);
         }
 
         public void Run()
@@ -41,6 +56,7 @@ namespace GreatCodNet
             _renderWindow.Clear();
 
             _quadTree.Draw(_renderWindow);
+            DrawPoints();
 
             _renderWindow.Display();
         }
