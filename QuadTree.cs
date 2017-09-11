@@ -20,11 +20,13 @@ namespace GreatCodNet
         int MaxObjects = 4;
         int MaxLevels = 10;
         int Level = 0;
+        int id = 0;
+        public int Id => id;
 
         private List<Edge> edges;
         private List<QuadTree> nodes = new List<QuadTree>();
 
-        public QuadTree(int level, RectangleShape bounds, Vector2f position, bool center = false)
+        public QuadTree(int id, int level, RectangleShape bounds, Vector2f position, bool center = false)
         {
             Bounds = bounds;
             Bounds.OutlineThickness = OutlineThickness;
@@ -33,6 +35,7 @@ namespace GreatCodNet
             Bounds.Position = center ? position - GetCenter() : position;
             Level = level;
             SetupEdges(bounds);
+            this.id = id;
         }
 
         public void Draw(RenderWindow renderWindow)
@@ -82,6 +85,28 @@ namespace GreatCodNet
             };
         }
 
+        public QuadTree GetQuadTreeForPoint(Vector2f point)
+        {
+            QuadTree quadTree= null;
+            if (IsInside(point))
+            {
+                if(nodes.Count > 0)
+                {
+                    foreach(var node in nodes)
+                    {
+                        var subNode = node.GetQuadTreeForPoint(point);
+                        if (subNode != null )
+                        {
+                            Console.WriteLine("Found node");
+                            return subNode;
+                        }
+                    }
+                }
+                quadTree = this;
+            }
+            return quadTree;
+        }
+
         public bool IsInside(Vector2f point)
         {
             var xp = point.X;
@@ -110,10 +135,10 @@ namespace GreatCodNet
             var newBounds = new RectangleShape(new Vector2f(Bounds.Size.X/2, Bounds.Size.Y/2));
             var center = GetCenter();
 
-            var northEast = new QuadTree(Level+1, new RectangleShape(newBounds), new Vector2f(center.X, center.Y - newBounds.Size.Y));
-            var northWest = new QuadTree(Level+1, new RectangleShape(newBounds), new Vector2f(center.X - newBounds.Size.X, center.Y - newBounds.Size.Y));
-            var southWest = new QuadTree(Level+1, new RectangleShape(newBounds), new Vector2f(center.X - newBounds.Size.X, center.Y));
-            var southEast = new QuadTree(Level+1, new RectangleShape(newBounds), new Vector2f(center.X, center.Y));
+            var northEast = new QuadTree(id++, Level+1, new RectangleShape(newBounds), new Vector2f(center.X, center.Y - newBounds.Size.Y));
+            var northWest = new QuadTree(id++, Level+1, new RectangleShape(newBounds), new Vector2f(center.X - newBounds.Size.X, center.Y - newBounds.Size.Y));
+            var southWest = new QuadTree(id++, Level+1, new RectangleShape(newBounds), new Vector2f(center.X - newBounds.Size.X, center.Y));
+            var southEast = new QuadTree(id++, Level+1, new RectangleShape(newBounds), new Vector2f(center.X, center.Y));
             nodes.AddRange(new List<QuadTree>{northEast, northWest, southWest, southEast});
         }
 

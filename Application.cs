@@ -28,7 +28,7 @@ namespace GreatCodNet
             var screenCenter = new Vector2f(_renderWindow.Size.X / 2, _renderWindow.Size.Y / 2);
             AddPoint(screenCenter);
 
-            _quadTree = new QuadTree(0, new RectangleShape(new Vector2f(1000, 700)), screenCenter, center:true);
+            _quadTree = new QuadTree(0, 0, new RectangleShape(new Vector2f(1000, 700)), screenCenter, center:true);
         }
 
         private void AddPoint(Vector2f point)
@@ -73,10 +73,14 @@ namespace GreatCodNet
             }
             if (e.Code == Keyboard.Key.S)
             {
-                _quadTree.Split();
+                var quadId = selectedQuadTree == null ? "None" : selectedQuadTree.Id.ToString();
+                Console.WriteLine($"Selected QuadTree id : {quadId}");
+                if(selectedQuadTree != null)
+                    selectedQuadTree.Split();
             }
         }
 
+        QuadTree selectedQuadTree = null;
         private void RenderWindow_MouseButtonPressed(object sender, MouseButtonEventArgs e)
         {
             Console.WriteLine($"Mouseclick {e.Button} x:{e.X}, y:{e.Y}");
@@ -89,6 +93,12 @@ namespace GreatCodNet
             {
                 var contains = _quadTree.IsInside(new Vector2f(e.X, e.Y));
                 Console.WriteLine(contains ? "Inside" : "Outside");                
+            }
+            if(e.Button == Mouse.Button.Middle)
+            {
+                selectedQuadTree = _quadTree.GetQuadTreeForPoint(new Vector2f(e.X, e.Y));
+                var quadId = selectedQuadTree == null ? "None" : selectedQuadTree.Id.ToString();
+                Console.WriteLine($"Selected QuadTree id : {quadId}");
             }
             
         }
