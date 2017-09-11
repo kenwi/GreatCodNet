@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace GreatCodNet
 {
@@ -19,9 +20,9 @@ namespace GreatCodNet
     public class QuadTree
     {
         public Vector2f Position => Bounds.Position;
-
+        public Color FillColor;// = Color.Blue;
+        
         Color OutlineColor = Color.White;
-        Color FillColor = Color.Blue;
         RectangleShape Bounds;
 
         float OutlineThickness = 1;
@@ -29,6 +30,9 @@ namespace GreatCodNet
         int MaxObjects = 4;
         int MaxLevels = 10;
         int Level = 0;
+
+        private List<Edge> edges;
+        private List<QuadTree> nodes = new List<QuadTree>();
 
         public QuadTree(int level, RectangleShape bounds, Vector2f position)
         {
@@ -38,25 +42,23 @@ namespace GreatCodNet
             Bounds.FillColor = FillColor;
             Bounds.Position = position;
             Level = level;
-            
+            SetupEdges();
         }
 
         public void Draw(RenderWindow renderWindow)
         {
             if(DrawBounds)
                 renderWindow.Draw(Bounds);
-        }
-
-        public void Insert(CircleShape shape)
-        {
             
+            foreach (var node in nodes)
+            {
+                renderWindow.Draw(node.Bounds);
+            }
         }
 
-        public bool Contains(Vector2f point, RenderWindow renderWindow)
+        public void SetupEdges()
         {
-            var xp = point.X;
-            var yp = point.Y;
-            var edges = new List<Edge>
+            edges = new List<Edge>
             {
                 new Edge()
                 {
@@ -91,6 +93,13 @@ namespace GreatCodNet
                     y2 = Bounds.Position.Y + Bounds.Size.Y
                 }
             };
+        }
+
+        public bool IsInside(Vector2f point)
+        {
+            var xp = point.X;
+            var yp = point.Y;
+
 
             foreach (var edge in edges)
             {
@@ -115,9 +124,24 @@ namespace GreatCodNet
             return true;
         }
 
-        private void Split()
+        public void Split()
         {
             Console.WriteLine($"Splitting QuadTree at level {this.Level}");
+            
+            var newBounds = new RectangleShape(new Vector2f(Bounds.Size.X/2, (float)Bounds.Size.Y/2));
+            var center = GetCenter();
+
+            var northEast = new QuadTree(Level+1, newBounds, new Vector2f(center.X, center.Y - newBounds.Size.Y));
+            nodes.Add(northEast);
+            
+            var northWest = new QuadTree(Level+1, newBounds, new Vector2f(center.X - newBounds.Size.X, center.Y - newBounds.Size.Y));
+            nodes.Add(northWest);
+            
+            var southWest = new QuadTree(Level+1, newBounds, new Vector2f(center.X - newBounds.Size.X, center.Y));
+            nodes.Add(southWest);
+            
+            var southEast = new QuadTree(Level+1, newBounds, new Vector2f(center.X, center.Y));
+            nodes.Add(southEast);
         }
 
         private int GetIndex(CircleShape shape)

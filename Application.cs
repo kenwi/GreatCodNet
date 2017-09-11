@@ -56,12 +56,16 @@ namespace GreatCodNet
             {
                 Console.WriteLine($"Quadtree Position x:{_quadTree.Position.X}, y:{_quadTree.Position.Y}");
             }
+            if (e.Code == Keyboard.Key.S)
+            {
+                _quadTree.Split();
+            }
         }
 
         private void RenderWindow_MouseButtonPressed(object sender, MouseButtonEventArgs e)
         {
             Console.WriteLine($"Mouseclick {e.Button} x:{e.X}, y:{e.Y}");
-            var contains = _quadTree.Contains(new Vector2f(e.X, e.Y), _renderWindow);
+            var contains = _quadTree.IsInside(new Vector2f(e.X, e.Y));
             Console.WriteLine(contains ? "Inside" : "Outside");
 
         }
