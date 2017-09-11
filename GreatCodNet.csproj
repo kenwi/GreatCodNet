@@ -101,6 +101,6 @@
     </PropertyGroup>
     <Error Condition="!Exists('packages\Graphnode.SFML.Net.2.4\build\Graphnode.SFML.Net.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Graphnode.SFML.Net.2.4\build\Graphnode.SFML.Net.targets'))" />
   </Target>
-  <Import Project="packages\Baseclass.Contrib.Nuget.Output.1.0.0\build\net40\Baseclass.Contrib.Nuget.Output.targets" />
+<!--  <Import Project="packages\Baseclass.Contrib.Nuget.Output.1.0.0\build\net40\Baseclass.Contrib.Nuget.Output.targets" />-->
   <Import Project="packages\Graphnode.SFML.Net.2.4\build\Graphnode.SFML.Net.targets" />
 </Project>

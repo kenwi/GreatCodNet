@@ -39,11 +39,8 @@ namespace GreatCodNet
         {
             if(DrawBounds)
                 renderWindow.Draw(Bounds);
-            
-            foreach (var node in nodes)
-            {
-                node.Draw(renderWindow);
-            }
+
+            nodes.ForEach(node => node.Draw(renderWindow));
         }
 
         public void SetupEdges(RectangleShape bounds)
@@ -92,18 +89,12 @@ namespace GreatCodNet
 
             foreach (var edge in edges)
             {
-                Console.WriteLine($"Checking {edge.name}");
-                
-                // A * x + B * y + C = 0
-                var x1 = edge.x1;
-                var x2 = edge.x2;
-                var y1 = edge.y1;
-                var y2 = edge.y2;
+                Console.WriteLine($"Checking {edge.name}");                
+                var A = -(edge.y2 - edge.y1);
+                var B = edge.x2 - edge.x1;
+                var C = -(A * edge.x1 + B * edge.y1);
 
-                var A = -(y2 - y1);
-                var B = x2 - x1;
-                var C = -(A * x1 + B * y1);
-                
+                // A * x + B * y + C = 0
                 var D = A * xp + B * yp + C;
                 if (D < 0)
                     return false;
@@ -148,7 +139,7 @@ namespace GreatCodNet
 
         public Vector2f GetCenter()
         {
-            return new Vector2f(this.Bounds.Position.X + this.Bounds.Size.X / 2, this.Bounds.Position.Y + this.Bounds.Size.Y / 2);
+            return new Vector2f(Position.X + Bounds.Size.X / 2, Position.Y + Bounds.Size.Y / 2);
         }
     }
 }
