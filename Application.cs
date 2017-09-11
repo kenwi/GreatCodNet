@@ -33,7 +33,7 @@ namespace GreatCodNet
 
         private void AddPoint(Vector2f point)
         {
-            points[numPoints] = new Vertex(point);
+            points[numPoints++] = new Vertex(point);
         }
 
         private void DrawPoints()
