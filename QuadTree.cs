@@ -11,20 +11,19 @@ namespace GreatCodNet
     {
         public Vector2f Position => Bounds.Position;
         public Color FillColor = Color.Blue;
+        public int Id => id;        
+        
         private Color OutlineColor = Color.White;
         private RectangleShape Bounds;
-
         private float OutlineThickness = 1;
         private bool DrawBounds = true;
         private int MaxObjects = 4;
         private int MaxLevels = 10;
         private int Level = 0;
-        
         private int id = 0;
-        public int Id => id;
 
         private List<Edge> _edges;
-        private List<QuadTree> _nodes = new List<QuadTree>();
+        private readonly List<QuadTree> _nodes = new List<QuadTree>(4);
 
         public QuadTree(int id, int level, RectangleShape bounds, Vector2f position, bool center = false)
         {
@@ -132,12 +131,14 @@ namespace GreatCodNet
             Console.WriteLine($"Splitting QuadTree at level {Level}");
             
             var newBounds = new RectangleShape(new Vector2f(Bounds.Size.X/2, Bounds.Size.Y/2));
+            var eastBounds = new RectangleShape(new Vector2f(Bounds.Size.X/2-1, Bounds.Size.Y/2));
+            
             var center = GetCenter();
 
-            var northEast = new QuadTree(id++, Level+1, new RectangleShape(newBounds), new Vector2f(center.X, center.Y - newBounds.Size.Y));
+            var northEast = new QuadTree(id++, Level+1, new RectangleShape(eastBounds), new Vector2f(center.X + 1, center.Y - newBounds.Size.Y));
             var northWest = new QuadTree(id++, Level+1, new RectangleShape(newBounds), new Vector2f(center.X - newBounds.Size.X, center.Y - newBounds.Size.Y));
             var southWest = new QuadTree(id++, Level+1, new RectangleShape(newBounds), new Vector2f(center.X - newBounds.Size.X, center.Y));
-            var southEast = new QuadTree(id++, Level+1, new RectangleShape(newBounds), new Vector2f(center.X, center.Y));
+            var southEast = new QuadTree(id++, Level+1, new RectangleShape(eastBounds), new Vector2f(center.X + 1, center.Y));
             _nodes.AddRange(new List<QuadTree>{northEast, northWest, southWest, southEast});
         }
 
