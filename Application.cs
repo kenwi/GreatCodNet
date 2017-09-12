@@ -88,14 +88,20 @@ namespace GreatCodNet
             }
             if (e.Button == Mouse.Button.Left)
             {
-                var contains = _quadTree.IsInside(new Vector2f(e.X, e.Y));
-                Console.WriteLine(contains ? "Inside" : "Outside");                
+                var point = new Vector2f(e.X, e.Y);
+                var quadTree = _quadTree.GetQuadTreeForPoint(point);
+                if(quadTree == null)
+                    Console.WriteLine("No quadtree selected");
+                quadTree?.Insert(point);
+
             }
             if(e.Button == Mouse.Button.Middle)
             {
                 _selectedQuadTree = _quadTree.GetQuadTreeForPoint(new Vector2f(e.X, e.Y));
                 var quadId = _selectedQuadTree?.Id.ToString() ?? "None";
-                Console.WriteLine($"Selected QuadTree id : {quadId}");
+                var quadlevel = _selectedQuadTree?.Level.ToString() ?? "None";
+                var quadObjects = _selectedQuadTree?.Objects.Count.ToString() ?? "None";
+                Console.WriteLine($"Selected QuadTree id : {quadId}, level : {quadlevel}, object count : {quadObjects}");
             }
             
         }

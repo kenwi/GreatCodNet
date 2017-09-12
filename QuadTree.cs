@@ -11,7 +11,10 @@ namespace GreatCodNet
     {
         public Vector2f Position => Bounds.Position;
         public Color FillColor = Color.Blue;
-        public int Id => id;        
+        public int Id => _id;
+        public List<Vector2f> Objects => _objects;
+
+        public int Level;
         
         private Color OutlineColor = Color.White;
         private RectangleShape Bounds;
@@ -19,11 +22,11 @@ namespace GreatCodNet
         private bool DrawBounds = true;
         private int MaxObjects = 4;
         private int MaxLevels = 10;
-        private int Level = 0;
-        private int id = 0;
+        private int _id;
 
         private List<Edge> _edges;
         private readonly List<QuadTree> _nodes = new List<QuadTree>(4);
+        private readonly List<Vector2f> _objects = new List<Vector2f>();
 
         public QuadTree(int id, int level, RectangleShape bounds, Vector2f position, bool center = false)
         {
@@ -34,15 +37,22 @@ namespace GreatCodNet
             Bounds.Position = center ? position - GetCenter() : position;
             Level = level;
             SetupEdges(bounds);
-            this.id = id;
+            this._id = id;
         }
 
         public void Draw(RenderWindow renderWindow)
         {
             if(DrawBounds)
                 renderWindow.Draw(Bounds);
-
+            
             _nodes.ForEach(node => node.Draw(renderWindow));
+            
+            _objects.ForEach(obj =>
+            {
+                var sphere = new CircleShape(5);
+                sphere.Position = obj - new Vector2f(sphere.Radius, sphere.Radius);
+                renderWindow.Draw(sphere);
+            });
         }
 
         public void SetupEdges(RectangleShape bounds)
@@ -123,6 +133,17 @@ namespace GreatCodNet
             return true;
         }
 
+        public void Insert(Vector2f obj)
+        {
+            Console.WriteLine($"Adding object to QuadTree id : {_id}, level : {Level}");
+            _objects.Add(obj);
+            if (_objects.Count > MaxObjects && Level < MaxLevels)
+            {
+                if(_nodes.Count == 0)
+                    Split();
+            }
+        }
+        
         public void Split()
         {
             if (_nodes.Count > 0)
@@ -135,10 +156,10 @@ namespace GreatCodNet
             
             var center = GetCenter();
 
-            var northEast = new QuadTree(id++, Level+1, new RectangleShape(eastBounds), new Vector2f(center.X + 1, center.Y - newBounds.Size.Y));
-            var northWest = new QuadTree(id++, Level+1, new RectangleShape(newBounds), new Vector2f(center.X - newBounds.Size.X, center.Y - newBounds.Size.Y));
-            var southWest = new QuadTree(id++, Level+1, new RectangleShape(newBounds), new Vector2f(center.X - newBounds.Size.X, center.Y));
-            var southEast = new QuadTree(id++, Level+1, new RectangleShape(eastBounds), new Vector2f(center.X + 1, center.Y));
+            var northEast = new QuadTree(_id++, Level+1, new RectangleShape(eastBounds), new Vector2f(center.X + 1, center.Y - newBounds.Size.Y));
+            var northWest = new QuadTree(_id++, Level+1, new RectangleShape(newBounds), new Vector2f(center.X - newBounds.Size.X, center.Y - newBounds.Size.Y));
+            var southWest = new QuadTree(_id++, Level+1, new RectangleShape(newBounds), new Vector2f(center.X - newBounds.Size.X, center.Y));
+            var southEast = new QuadTree(_id++, Level+1, new RectangleShape(eastBounds), new Vector2f(center.X + 1, center.Y));
             _nodes.AddRange(new List<QuadTree>{northEast, northWest, southWest, southEast});
         }
 
