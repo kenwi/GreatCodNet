@@ -9,41 +9,46 @@ namespace GreatCodNet
 
     public class QuadTree
     {
-        public Vector2f Position => Bounds.Position;
-        public Color FillColor = Color.Blue;
         public int Id => _id;
+        public int Level => _level;
+        public Vector2f Position => _bounds.Position;
         public List<Vector2f> Objects => _objects;
-
-        public int Level;
-        
-        private Color OutlineColor = Color.White;
-        private RectangleShape Bounds;
-        private float OutlineThickness = 1;
-        private bool DrawBounds = true;
-        private int MaxObjects = 4;
-        private int MaxLevels = 10;
+        public Color FillColor { get { return _fillColor; } set { _fillColor = value; } }
+    
         private int _id;
+        private int _level;
+        private int _maxObjects = 4;
+        private int _maxLevels = 10;
+        private float _outlineThickness = 1;
+        private bool _drawBounds = true;
+
+        private Color _outlineColor = Color.White;
+        private Color _fillColor = Color.Blue;
+        private RectangleShape _bounds;
 
         private List<Edge> _edges;
-        private readonly List<QuadTree> _nodes = new List<QuadTree>(4);
-        private readonly List<Vector2f> _objects = new List<Vector2f>();
-
+        private readonly List<QuadTree> _nodes;
+        private readonly List<Vector2f> _objects;
+        
         public QuadTree(int id, int level, RectangleShape bounds, Vector2f position, bool center = false)
         {
-            Bounds = bounds;
-            Bounds.OutlineThickness = OutlineThickness;
-            Bounds.OutlineColor = OutlineColor;
-            Bounds.FillColor = FillColor;
-            Bounds.Position = center ? position - GetCenter() : position;
-            Level = level;
-            SetupEdges(bounds);
-            this._id = id;
+            _id = id++;
+            _level = level;
+            _bounds = bounds;
+            _bounds.Position = center ? position - GetCenter() : position;
+            _bounds.OutlineThickness = _outlineThickness;
+            _bounds.OutlineColor = _outlineColor;
+            _bounds.FillColor = _fillColor;
+
+            _nodes = new List<QuadTree>();
+            _objects = new List<Vector2f>();
+            SetupEdges(_bounds);
         }
 
         public void Draw(RenderWindow renderWindow)
         {
-            if(DrawBounds)
-                renderWindow.Draw(Bounds);
+            if(_drawBounds)
+                renderWindow.Draw(_bounds);
             
             _nodes.ForEach(node => node.Draw(renderWindow));
             
@@ -61,7 +66,7 @@ namespace GreatCodNet
             {
                 new Edge()
                 {
-                    Name = "TopEdge",
+                    Name = "Top Edge",
                     X1 = bounds.Position.X,
                     X2 = bounds.Position.X + bounds.Size.X,
                     Y1 = bounds.Position.Y,
@@ -69,27 +74,27 @@ namespace GreatCodNet
                 }, 
                 new Edge()
                 {
-                    Name = "LeftEdge",
-                    X1 = Bounds.Position.X,
-                    X2 = Bounds.Position.X,
-                    Y1 = Bounds.Position.Y + Bounds.Size.Y,
-                    Y2 = Bounds.Position.Y
+                    Name = "Left Edge",
+                    X1 = _bounds.Position.X,
+                    X2 = _bounds.Position.X,
+                    Y1 = _bounds.Position.Y + _bounds.Size.Y,
+                    Y2 = _bounds.Position.Y
                 },
                 new Edge()
                 {
-                    Name = "BottomEdge",
-                    X1 = Bounds.Position.X + Bounds.Size.X,
-                    X2 = Bounds.Position.X,
-                    Y1 = Bounds.Position.Y + Bounds.Size.Y,
-                    Y2 = Bounds.Position.Y + Bounds.Size.Y
+                    Name = "Bottom Edge",
+                    X1 = _bounds.Position.X + _bounds.Size.X,
+                    X2 = _bounds.Position.X,
+                    Y1 = _bounds.Position.Y + _bounds.Size.Y,
+                    Y2 = _bounds.Position.Y + _bounds.Size.Y
                 }, 
                 new Edge()
                 {
-                    Name = "RightEdge",
-                    X1 = Bounds.Position.X + Bounds.Size.X,
-                    X2 = Bounds.Position.X + Bounds.Size.X,
-                    Y1 = Bounds.Position.Y,
-                    Y2 = Bounds.Position.Y + Bounds.Size.Y
+                    Name = "Right Edge",
+                    X1 = _bounds.Position.X + _bounds.Size.X,
+                    X2 = _bounds.Position.X + _bounds.Size.X,
+                    Y1 = _bounds.Position.Y,
+                    Y2 = _bounds.Position.Y + _bounds.Size.Y
                 }
             };
         }
@@ -107,7 +112,7 @@ namespace GreatCodNet
                     if (subNode == null) 
                         continue;
                     
-                    Console.WriteLine("Found node");
+                    Console.WriteLine($"Found node id : {subNode.Id} in level {_level}");
                     return subNode;
                 }
             }
@@ -137,7 +142,7 @@ namespace GreatCodNet
         {
             Console.WriteLine($"Adding object to QuadTree id : {_id}, level : {Level}");
             _objects.Add(obj);
-            if (_objects.Count > MaxObjects && Level < MaxLevels)
+            if (_objects.Count > _maxObjects && Level < _maxLevels)
             {
                 if(_nodes.Count == 0)
                     Split();
@@ -151,8 +156,8 @@ namespace GreatCodNet
             
             Console.WriteLine($"Splitting QuadTree at level {Level}");
             
-            var newBounds = new RectangleShape(new Vector2f(Bounds.Size.X/2, Bounds.Size.Y/2));
-            var eastBounds = new RectangleShape(new Vector2f(Bounds.Size.X/2-1, Bounds.Size.Y/2));
+            var newBounds = new RectangleShape(new Vector2f(_bounds.Size.X/2, _bounds.Size.Y/2));
+            var eastBounds = new RectangleShape(new Vector2f(_bounds.Size.X/2-1, _bounds.Size.Y/2));
             
             var center = GetCenter();
 
@@ -179,13 +184,13 @@ namespace GreatCodNet
 
         public void SetPosition(Vector2f position)
         {
-            Bounds.Position = position;
-            SetupEdges(Bounds);
+            _bounds.Position = position;
+            SetupEdges(_bounds);
         }
 
         public Vector2f GetCenter()
         {
-            return new Vector2f(Position.X + Bounds.Size.X / 2, Position.Y + Bounds.Size.Y / 2);
+            return new Vector2f(Position.X + _bounds.Size.X / 2, Position.Y + _bounds.Size.Y / 2);
         }
     }
 }

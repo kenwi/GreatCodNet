@@ -101,6 +101,8 @@ namespace GreatCodNet
                 var quadId = _selectedQuadTree?.Id.ToString() ?? "None";
                 var quadlevel = _selectedQuadTree?.Level.ToString() ?? "None";
                 var quadObjects = _selectedQuadTree?.Objects.Count.ToString() ?? "None";
+                _selectedQuadTree.FillColor = Color.Green;
+                _selectedQuadTree.Split();
                 Console.WriteLine($"Selected QuadTree id : {quadId}, level : {quadlevel}, object count : {quadObjects}");
             }
             
