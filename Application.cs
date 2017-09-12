@@ -8,18 +8,17 @@ namespace GreatCodNet
 
     public class Application
     {
-        private static Vector2f _windowSize;
         private readonly RenderWindow _renderWindow;
         private readonly QuadTree _quadTree;
-
-        int numPoints = 0;
-        Vertex[] points = new Vertex[100];
+        private QuadTree _selectedQuadTree;
+        
+        private int _numPoints;
+        private Vertex[] _points = new Vertex[100];
 
         public Application()
         {
-            _windowSize = new Vector2f(1024, 768);
-
-            _renderWindow = new RenderWindow(new VideoMode((uint)_windowSize.X, (uint)_windowSize.Y), "Application");
+            var windowSize = new Vector2f(1024, 768);
+            _renderWindow = new RenderWindow(new VideoMode((uint)windowSize.X, (uint)windowSize.Y), "Application");
             _renderWindow.MouseButtonPressed += RenderWindow_MouseButtonPressed;
             _renderWindow.MouseWheelScrolled += RenderWindow_MouseWheelScrolled;
             _renderWindow.KeyPressed += RenderWindow_KeyPressed;
@@ -33,12 +32,12 @@ namespace GreatCodNet
 
         private void AddPoint(Vector2f point)
         {
-            points[numPoints++] = new Vertex(point);
+            _points[_numPoints++] = new Vertex(point);
         }
 
         private void DrawPoints()
         {
-            _renderWindow.Draw(points, PrimitiveType.Points);
+            _renderWindow.Draw(_points, PrimitiveType.Points);
         }
 
         public void Run()
@@ -73,14 +72,12 @@ namespace GreatCodNet
             }
             if (e.Code == Keyboard.Key.S)
             {
-                var quadId = selectedQuadTree == null ? "None" : selectedQuadTree.Id.ToString();
+                var quadId = _selectedQuadTree?.Id.ToString() ?? "None";
                 Console.WriteLine($"Selected QuadTree id : {quadId}");
-                if(selectedQuadTree != null)
-                    selectedQuadTree.Split();
+                _selectedQuadTree?.Split();
             }
         }
 
-        QuadTree selectedQuadTree = null;
         private void RenderWindow_MouseButtonPressed(object sender, MouseButtonEventArgs e)
         {
             Console.WriteLine($"Mouseclick {e.Button} x:{e.X}, y:{e.Y}");
@@ -96,8 +93,8 @@ namespace GreatCodNet
             }
             if(e.Button == Mouse.Button.Middle)
             {
-                selectedQuadTree = _quadTree.GetQuadTreeForPoint(new Vector2f(e.X, e.Y));
-                var quadId = selectedQuadTree == null ? "None" : selectedQuadTree.Id.ToString();
+                _selectedQuadTree = _quadTree.GetQuadTreeForPoint(new Vector2f(e.X, e.Y));
+                var quadId = _selectedQuadTree?.Id.ToString() ?? "None";
                 Console.WriteLine($"Selected QuadTree id : {quadId}");
             }
             

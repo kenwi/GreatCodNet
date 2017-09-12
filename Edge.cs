@@ -2,11 +2,11 @@
 {
     public class Edge
     {
-        public float x1;
-        public float x2;
-        public float y1;
-        public float y2;
+        public float X1;
+        public float X2;
+        public float Y1;
+        public float Y2;
 
-        public string name;
+        public string Name;
     }
 }
