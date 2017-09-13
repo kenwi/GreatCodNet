@@ -13,7 +13,7 @@ namespace GreatCodNet
         public int Level => _level;
         public Vector2f Position => _bounds.Position;
         public List<Vector2f> Objects => _objects;
-        public Color FillColor { get { return _fillColor; } set { _fillColor = value; } }
+        public Color FillColor { get => _fillColor; set => _fillColor = value; }
     
         private int _id;
         private int _level;
@@ -27,10 +27,12 @@ namespace GreatCodNet
         private RectangleShape _bounds;
 
         private List<Edge> _edges;
-        private readonly List<QuadTree> _nodes;
+        //private readonly List<QuadTree> _nodes;
+        //private readonly QuadTree[] _nodes;
+        private readonly Dictionary<int, QuadTree> _nodes;
         private readonly List<Vector2f> _objects;
         
-        public QuadTree(int id, int level, RectangleShape bounds, Vector2f position, bool center = false)
+        public QuadTree(ref int id, int level, RectangleShape bounds, Vector2f position, bool center = false)
         {
             _id = id++;
             _level = level;
@@ -40,7 +42,9 @@ namespace GreatCodNet
             _bounds.OutlineColor = _outlineColor;
             _bounds.FillColor = _fillColor;
 
-            _nodes = new List<QuadTree>();
+            //_nodes = new List<QuadTree>();
+            //_nodes = new QuadTree[4];
+            _nodes = new Dictionary<int, QuadTree>(4);
             _objects = new List<Vector2f>();
             SetupEdges(_bounds);
         }
@@ -50,7 +54,8 @@ namespace GreatCodNet
             if(_drawBounds)
                 renderWindow.Draw(_bounds);
             
-            _nodes.ForEach(node => node.Draw(renderWindow));
+            //_nodes.Where(node => node != null).ToList().ForEach(node => node.Draw(renderWindow));
+            _nodes.Values.ToList().ForEach(node => node.Draw(renderWindow));
             
             _objects.ForEach(obj =>
             {
@@ -104,9 +109,9 @@ namespace GreatCodNet
             if (!IsInside(point)) 
                 return null;
             
-            if(_nodes.Count > 0)
+            if(_nodes.ToList().Count > 0)
             {
-                foreach(var node in _nodes)
+                foreach(var node in _nodes.Values)
                 {
                     var subNode = node.GetQuadTreeForPoint(point);
                     if (subNode == null) 
@@ -146,7 +151,34 @@ namespace GreatCodNet
             {
                 if(_nodes.Count == 0)
                     Split();
+
+                int i = 0;
+                while (i < _objects.Count)
+                {
+                    int index = GetIndex(_objects[i]);
+                    if (index != -1)
+                    {
+                        _nodes[index].Insert(_objects[i]);
+                        if (_objects.Remove(_objects[i]))
+                        {
+                            Console.WriteLine("Removed node");
+                        }
+                    }
+                    else
+                        i++;
+                }
             }
+        }
+
+        public List<Vector2f> Retrieve(ref List<Vector2f> objects, Vector2f shape)
+        {
+            var index = GetIndex(shape);
+            if (index != -1 && _nodes.Count > 0)
+            {
+                _nodes[index].Retrieve(ref objects, shape);
+            }
+            objects.AddRange(_objects);
+            return objects;
         }
         
         public void Split()
@@ -156,26 +188,30 @@ namespace GreatCodNet
             
             Console.WriteLine($"Splitting QuadTree at level {Level}");
             
-            var newBounds = new RectangleShape(new Vector2f(_bounds.Size.X/2, _bounds.Size.Y/2));
+            var westBounds = new RectangleShape(new Vector2f(_bounds.Size.X/2, _bounds.Size.Y/2));
             var eastBounds = new RectangleShape(new Vector2f(_bounds.Size.X/2-1, _bounds.Size.Y/2));
             
             var center = GetCenter();
-
-            var northEast = new QuadTree(_id++, Level+1, new RectangleShape(eastBounds), new Vector2f(center.X + 1, center.Y - newBounds.Size.Y));
-            var northWest = new QuadTree(_id++, Level+1, new RectangleShape(newBounds), new Vector2f(center.X - newBounds.Size.X, center.Y - newBounds.Size.Y));
-            var southWest = new QuadTree(_id++, Level+1, new RectangleShape(newBounds), new Vector2f(center.X - newBounds.Size.X, center.Y));
-            var southEast = new QuadTree(_id++, Level+1, new RectangleShape(eastBounds), new Vector2f(center.X + 1, center.Y));
-            _nodes.AddRange(new List<QuadTree>{northEast, northWest, southWest, southEast});
+            var northEast = new QuadTree(ref _id, Level+1, new RectangleShape(eastBounds), new Vector2f(center.X + 1, center.Y - westBounds.Size.Y));
+            var northWest = new QuadTree(ref _id, Level+1, new RectangleShape(westBounds), new Vector2f(center.X - westBounds.Size.X, center.Y - westBounds.Size.Y));
+            var southWest = new QuadTree(ref _id, Level+1, new RectangleShape(westBounds), new Vector2f(center.X - westBounds.Size.X, center.Y));
+            var southEast = new QuadTree(ref _id, Level+1, new RectangleShape(eastBounds), new Vector2f(center.X + 1, center.Y));
+            _nodes[0] = northEast;
+            _nodes[1] = northWest;
+            _nodes[2] = southWest;
+            _nodes[3] = southEast;
+            //_nodes.AddRange(new List<QuadTree>{northEast, northWest, southWest, southEast});
         }
 
         public int GetIndex(Vector2f position)
         {
             var index = -1;
-            for (var i = 0; i < _nodes.Count; i++)
+            for (var i = 0; i < _nodes.ToList().Count; i++)
             {
                 if (_nodes[i] != null && _nodes[i].IsInside(position))
                 {
                     index = i;
+                    break;
                 }
             }
             

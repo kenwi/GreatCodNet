@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace GreatCodNet
 {
@@ -11,6 +12,7 @@ namespace GreatCodNet
         private readonly RenderWindow _renderWindow;
         private readonly QuadTree _quadTree;
         private QuadTree _selectedQuadTree;
+        private Vector2f _selectedObject;
         
         private int _numPoints;
         private Vertex[] _points = new Vertex[100];
@@ -27,7 +29,8 @@ namespace GreatCodNet
             var screenCenter = new Vector2f(_renderWindow.Size.X / 2, _renderWindow.Size.Y / 2);
             AddPoint(screenCenter);
 
-            _quadTree = new QuadTree(0, 0, new RectangleShape(new Vector2f(1000, 700)), screenCenter, center:true);
+            var startId = 0;
+            _quadTree = new QuadTree(ref startId, 0, new RectangleShape(new Vector2f(1000, 700)), screenCenter, center:true);
         }
 
         private void AddPoint(Vector2f point)
@@ -76,6 +79,12 @@ namespace GreatCodNet
                 Console.WriteLine($"Selected QuadTree id : {quadId}");
                 _selectedQuadTree?.Split();
             }
+            if (e.Code == Keyboard.Key.Space)
+            {
+                var objects = new List<Vector2f>();
+                var list = _selectedQuadTree?.Retrieve(ref objects, _selectedObject);
+                objects.ForEach(point => Console.WriteLine($"Point x: {point.X}, y: {point.Y}"));
+            }
         }
 
         private void RenderWindow_MouseButtonPressed(object sender, MouseButtonEventArgs e)
@@ -93,6 +102,7 @@ namespace GreatCodNet
                 if(quadTree == null)
                     Console.WriteLine("No quadtree selected");
                 quadTree?.Insert(point);
+                _selectedObject = point;
 
             }
             if(e.Button == Mouse.Button.Middle)
@@ -101,8 +111,8 @@ namespace GreatCodNet
                 var quadId = _selectedQuadTree?.Id.ToString() ?? "None";
                 var quadlevel = _selectedQuadTree?.Level.ToString() ?? "None";
                 var quadObjects = _selectedQuadTree?.Objects.Count.ToString() ?? "None";
-                _selectedQuadTree.FillColor = Color.Green;
-                _selectedQuadTree.Split();
+                //_selectedQuadTree?.Split();
+                
                 Console.WriteLine($"Selected QuadTree id : {quadId}, level : {quadlevel}, object count : {quadObjects}");
             }
             
