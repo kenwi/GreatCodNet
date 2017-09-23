@@ -51,9 +51,6 @@ namespace GreatCodNet
 
         public void Draw(RenderWindow renderWindow)
         {
-            if(_drawBounds)
-                renderWindow.Draw(_bounds);
-            
             //_nodes.Where(node => node != null).ToList().ForEach(node => node.Draw(renderWindow));
             _nodes.Values.ToList().ForEach(node => node.Draw(renderWindow));
             
